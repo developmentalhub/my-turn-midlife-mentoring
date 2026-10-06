@@ -32,21 +32,6 @@ export async function sendMyTurnNotification({
   heading: string;
   lines: string[];
 }) {
-  console.log(
-  "My Turn email configuration:",
-  {
-    hasResendApiKey:
-      Boolean(resendApiKey),
-
-    fromEmail,
-
-    ownerEmail,
-
-    hasPartnerEmail:
-      Boolean(partnerEmail),
-  }
-);
-
   if (!resendApiKey) {
     throw new Error(
       "RESEND_API_KEY is missing."
@@ -91,10 +76,6 @@ export async function sendMyTurnNotification({
       `
     )
     .join("");
-
-  console.log(
-    "Attempting My Turn email..."
-  );
 
   const {
     data,
@@ -160,7 +141,7 @@ export async function sendMyTurnNotification({
 
   if (error) {
     console.error(
-      "Resend returned an error:",
+      "My Turn notification email failed:",
       error
     );
 
@@ -168,11 +149,6 @@ export async function sendMyTurnNotification({
       error.message
     );
   }
-
-  console.log(
-    "My Turn email sent successfully:",
-    data?.id
-  );
 
   return data;
 }

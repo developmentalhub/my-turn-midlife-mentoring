@@ -329,7 +329,7 @@ export default function CommunityWallPage() {
     return data.publicUrl;
   }
 
-  async function saveEntry(
+    async function saveEntry(
     event: FormEvent
   ) {
     event.preventDefault();
@@ -354,43 +354,54 @@ export default function CommunityWallPage() {
       const imageUrl =
         await uploadImage();
 
-      const {
-        data,
-        error,
-      } = await supabase
-        .from(
-          "my_turn_wall_entries"
-        )
-        .insert({
-          answer:
-            cleanAnswer || null,
-          image_url:
-            imageUrl,
-          category,
-        })
-        .select(
-          "id, answer, image_url, category, created_at"
-        )
-        .single();
+      const response =
+        await fetch(
+          "/api/community-wall",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              answer:
+                cleanAnswer,
+              imageUrl,
+              category,
+            }),
+          }
+        );
 
-      if (error) {
-        throw error;
+      const result =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            "Something went wrong while adding your memory."
+        );
       }
 
       const newEntry: WallEntry =
         {
-          id: data.id,
+          id:
+            result.entry.id,
           answer:
-            data.answer ?? "",
+            result.entry.answer ??
+            "",
           image_url:
-            data.image_url,
+            result.entry
+              .imageUrl ??
+            null,
           category:
-            data.category as Exclude<
+            result.entry
+              .category as Exclude<
               Category,
               "all"
             >,
           created_at:
-            data.created_at,
+            result.entry
+              .createdAt,
         };
 
       setEntries(
@@ -414,7 +425,9 @@ export default function CommunityWallPage() {
       );
 
       setMessage(
-        "Something went wrong while adding your memory. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while adding your memory. Please try again."
       );
     } finally {
       setSubmitting(false);

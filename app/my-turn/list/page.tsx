@@ -368,7 +368,7 @@ export default function MyTurnListPage() {
     }
   }
 
-  async function addCommitment(
+    async function addCommitment(
     event: FormEvent
   ) {
     event.preventDefault();
@@ -399,8 +399,7 @@ export default function MyTurnListPage() {
     }
 
     if (
-      cleanCommitment.length >
-      500
+      cleanCommitment.length > 500
     ) {
       setMessage(
         "Please keep your commitment under 500 characters."
@@ -414,65 +413,67 @@ export default function MyTurnListPage() {
 
     setMessage("");
 
-    const {
-      data,
-      error,
-    } = await supabase
-      .from(
-        "my_turn_commitments"
-      )
-      .insert({
-        first_name:
-          cleanName,
-        commitment:
-          cleanCommitment,
-      })
-      .select(
-        "id, first_name, commitment, created_at"
-      )
-      .single();
+    try {
+      const response =
+        await fetch(
+          "/api/commitment",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              firstName:
+                cleanName,
+              commitment:
+                cleanCommitment,
+            }),
+          }
+        );
 
-    setCommitmentSubmitting(
-      false
-    );
+      const result =
+        await response.json();
 
-    if (error) {
+      if (!response.ok) {
+        setMessage(
+          result.error ||
+            "Something went wrong while adding your commitment. Please try again."
+        );
+
+        return;
+      }
+
+      const newCommitment =
+        result.commitment as Commitment;
+
+      setCommitments(
+        (current) => [
+          newCommitment,
+          ...current,
+        ]
+      );
+
+      setFirstName("");
+      setCommitment("");
+
+      setMessage(
+        "Your commitment has been added to the shared wall."
+      );
+    } catch (error) {
       console.error(
-        "Commitment wall save error:",
+        "Commitment save error:",
         error
       );
 
       setMessage(
         "Something went wrong while adding your commitment. Please try again."
       );
-
-      return;
+    } finally {
+      setCommitmentSubmitting(
+        false
+      );
     }
-
-    const newCommitment: Commitment =
-      {
-        id: data.id,
-        firstName:
-          data.first_name,
-        text:
-          data.commitment,
-        createdAt:
-          data.created_at,
-      };
-
-    setCommitments(
-      (current) => [
-        newCommitment,
-        ...current,
-      ]
-    );
-
-    setFirstName("");
-    setCommitment("");
-
-    setMessage(
-      "Your commitment has been added to the shared wall."
-    );
   }
 
   return (
