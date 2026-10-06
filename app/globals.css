@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #eaf4f8;
+  color: #24343a;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #d8d0e5;
+  color: #24343a;
+}
+
+.serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.paper-texture {
+  background-image:
+    radial-gradient(circle at 20% 15%, rgba(255,255,255,.85), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,.45), rgba(255,255,255,.08));
+}
+
+.soft-grid {
+  background-image:
+    linear-gradient(rgba(53, 95, 107, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 95, 107, 0.055) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid rgba(53, 95, 107, 0.35);
+  outline-offset: 4px;
+}
