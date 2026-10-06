@@ -8,7 +8,6 @@ import Image from "next/image";
 import Link from "next/link";
 import MyTurnJourney from "../components/MyTurnJourney";
 import MyTurnNav from "../components/MyTurnNav";
-import { supabase } from "../lib/supabase";
 
 const notes = [
   {
@@ -157,82 +156,81 @@ export default function HomePage() {
     );
   }
 
-  async function submitRegistration(
-    event: FormEvent<HTMLFormElement>
+ async function submitRegistration(
+  event: FormEvent<HTMLFormElement>
+) {
+  event.preventDefault();
+
+  if (
+    !firstName.trim() ||
+    !email.trim()
   ) {
-    event.preventDefault();
+    setMessage(
+      "Please add your first name and email."
+    );
+    return;
+  }
 
-    if (
-      !firstName.trim() ||
-      !email.trim()
-    ) {
-      setMessage(
-        "Please add your first name and email."
-      );
-      return;
-    }
+  setSubmitting(true);
+  setMessage("");
 
-    setSubmitting(true);
-    setMessage("");
+  try {
+    const response = await fetch(
+      "/api/founding-registration",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          firstName:
+            firstName.trim(),
 
-    const { error } = await supabase
-      .from("my_turn_registrations")
-      .insert({
-        first_name:
-          firstName.trim(),
+          email:
+            email.trim(),
 
-        email:
-          email.trim(),
+          suburb:
+            suburb.trim(),
 
-        suburb:
-          suburb.trim() || null,
+          ageRange,
 
-        age_range:
-          ageRange || null,
-
-        preferred_days:
           preferredDays,
 
-        preferred_times:
           preferredTimes,
 
-        between_sessions:
           betweenSessions,
 
-        interests:
-          selectedInterests,
+          interests:
+            selectedInterests,
 
-        bring_someone:
-          bringSomeone || null,
+          bringSomeone,
 
-        childhood_play:
-          childhoodPlay.trim() ||
-          null,
+          childhoodPlay:
+            childhoodPlay.trim(),
 
-        miss_now:
-          miss.trim() || null,
+          missNow:
+            miss.trim(),
 
-        try_together:
-          tryTogether.trim() ||
-          null,
+          tryTogether:
+            tryTogether.trim(),
 
-        barrier:
-          barrier.trim() || null,
+          barrier:
+            barrier.trim(),
 
-        hope:
-          hope.trim() || null,
-      });
+          hope:
+            hope.trim(),
+        }),
+      }
+    );
 
-    setSubmitting(false);
+    const result =
+      await response.json();
 
-    if (error) {
-      console.error(
-        "Supabase registration error:",
-        error
-      );
-
+    if (!response.ok) {
       setMessage(
-        "Something went wrong while saving your registration. Please try again."
+        result.error ||
+          "Something went wrong while saving your registration. Please try again."
       );
 
       return;
@@ -249,7 +247,19 @@ export default function HomePage() {
           ?.offsetTop ?? 0,
       behavior: "smooth",
     });
+  } catch (error) {
+    console.error(
+      "Registration error:",
+      error
+    );
+
+    setMessage(
+      "Something went wrong while saving your registration. Please try again."
+    );
+  } finally {
+    setSubmitting(false);
   }
+}
 
   return (
     <div className="min-h-screen bg-[#dfeef4] text-[#24373d]">
