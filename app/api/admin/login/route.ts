@@ -36,25 +36,41 @@ export async function POST(
   request: NextRequest
 ) {
   const ownerPassword =
-    process.env
-      .MY_TURN_ADMIN_PASSWORD;
+    process.env.MY_TURN_ADMIN_PASSWORD;
 
   const partnerPassword =
-    process.env
-      .MY_TURN_PARTNER_ADMIN_PASSWORD;
+    process.env.MY_TURN_PARTNER_ADMIN_PASSWORD;
 
   const adminSecret =
-    process.env
-      .MY_TURN_ADMIN_SECRET;
+    process.env.MY_TURN_ADMIN_SECRET;
 
   if (
     !ownerPassword ||
     !adminSecret
   ) {
+    const missing: string[] = [];
+
+    if (!ownerPassword) {
+      missing.push(
+        "MY_TURN_ADMIN_PASSWORD"
+      );
+    }
+
+    if (!adminSecret) {
+      missing.push(
+        "MY_TURN_ADMIN_SECRET"
+      );
+    }
+
     return NextResponse.json(
       {
         error:
-          "Admin access is not configured.",
+          process.env.NODE_ENV ===
+          "development"
+            ? `Admin access is not configured. Missing: ${missing.join(
+                ", "
+              )}`
+            : "Admin access is not configured.",
       },
       {
         status: 503,
@@ -73,14 +89,14 @@ export async function POST(
         : "";
 
     const ownerMatch =
-      password &&
+      password.length > 0 &&
       passwordsMatch(
         password,
         ownerPassword
       );
 
     const partnerMatch =
-      password &&
+      password.length > 0 &&
       partnerPassword
         ? passwordsMatch(
             password,
@@ -115,8 +131,7 @@ export async function POST(
         httpOnly: true,
         sameSite: "strict",
         secure:
-          process.env
-            .NODE_ENV ===
+          process.env.NODE_ENV ===
           "production",
         path: "/",
         maxAge:

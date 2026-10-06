@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
-const COOKIE_NAME = "my-turn-admin-session";
+const COOKIE_NAME =
+  "my-turn-admin-session";
 
 function getSecret() {
   const secret =
@@ -20,7 +21,8 @@ export function createAdminSessionToken() {
     Date.now() +
     12 * 60 * 60 * 1000;
 
-  const payload = `my-turn-admin:${expires}`;
+  const payload =
+    `my-turn:admin:${expires}`;
 
   const signature = crypto
     .createHmac(
